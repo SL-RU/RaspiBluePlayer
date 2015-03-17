@@ -17,4 +17,5 @@ def stopAll():
     m.music.stop()
 
 def set_endevent(func):
-    m.music.set_endevent(func)
+    #m.music.set_endevent(func)
+    pass

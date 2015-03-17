@@ -6,46 +6,44 @@ import os
 import aplayer
 import random
 
-path = "music"
-musics = list()
-current_song = ""
-excluded_music = list()
 
-#вызывается при старте
-def init(pth):
-    global musics
+
+class MusicPlayer(object):
+    path = "music"
     musics = list()
-    wa = os.walk(pth + path)
-    for couple in wa:
-        for f in couple[2]:
-            musics.append(couple[0] + "\\" + f)
-    print(musics)
-
-#вызывается, когда нужно переключится в режим музыки
-def turn_on():
-    aplayer.set_endevent(on_music_ends)
-
-#вызывается, когда нужно переключится из режима музыки
-def turn_off():
-    global current_song
-    aplayer.stopAll()
     current_song = ""
+    excluded_music = list()
+    #вызывается при старте
+    def __init__(self, pth):
+        self.musics = list()
+        self.path = pth + self.path
+        wa = os.walk(self.path)
+        for couple in wa:
+            for f in couple[2]:
+                self.musics.append(couple[0] + "\\" + f)
+        print(self.musics)
+        self.turn_on()
+    #вызывается, когда нужно переключится в режим музыки
+    def turn_on(self):
+        aplayer.set_endevent(self.on_music_ends)
+
+    #вызывается, когда нужно переключится из режима музыки
+    def turn_off(self):
+        aplayer.stopAll()
+        self.current_song = ""
 
 
-def play_song(song):
-    global current_song
-    current_song = song
-    aplayer.play(song)
+    def play_song(self, song):
+        self.current_song = song
+        aplayer.play(song)
 
-def play_rnd():
-    global musics
-    if len(musics) > 0:
-        rnd = random.randint(0, len(musics) - 1)
-        play_song(musics[rnd])
+    def play_rnd(self):
+        if len(self.musics) > 0:
+            rnd = random.randint(0, len(self.musics) - 1)
+            self.play_song(self.musics[rnd])
 
-def on_music_ends():
-    global musics, current_song, excluded_music
-    if(current_song in musics):
-        musics.remove(current_song)
-        excluded_music.append(current_song)
-    play_rnd()
+    def on_music_ends(self):
+        if(self.current_song in self.musics):
+            self.musics.remove(self.current_song)
+            self.excluded_music.append(self.current_song)
+        self.play_rnd()

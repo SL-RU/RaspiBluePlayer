@@ -2,29 +2,34 @@ __author__ = 'SL_RU'
 
 ##главный файл. Точка входа
 
-from queue import  Queue
+##from queue import Thread
 
-from threading import Timer
+from threading import Thread
 import time
 import aplayer as pl
-import musicplayer
+from musicplayer import MusicPlayer
+import web
 
-path = "C:\\"
+path = "E:\\"
 
 pl.init()
-musicplayer.init(path)
+mpl = MusicPlayer(path)
 
-def func():
+def cli():
+    inp = ""
     while True:
-        print("lol")
-        time.sleep(2)
+        print("Press q to quit")
+        inp = input()
+        if(inp == "q"):
+            break
+        elif(inp == "p"):
+            mpl.play_rnd()
+        elif inp=="s":
+            pl.stopAll()
 
-thr = Timer(2, func)
+
+thr = Thread(target=cli)
 thr.setDaemon(True)
 thr.start()
 
-musicplayer.play_rnd()
-
-while input() != "q":
-    print("Press q to quit")
-
+web.start(mpl)
