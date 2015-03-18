@@ -35,12 +35,21 @@ class MusicPlayer(object):
 
     def play_song(self, song):
         self.current_song = song
-        aplayer.play(song)
+        aplayer.play_file(song)
+        aplayer.play()
 
     def play_rnd(self):
         if len(self.musics) > 0:
             rnd = random.randint(0, len(self.musics) - 1)
             self.play_song(self.musics[rnd])
+
+    def pause(self):
+        aplayer.pause()
+    def play(self):
+        if(self.current_song == ""):
+            self.play_rnd()
+        else:
+            aplayer.play()
 
     def on_music_ends(self):
         if(self.current_song in self.musics):

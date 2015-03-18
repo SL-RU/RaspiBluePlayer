@@ -25,7 +25,7 @@ def cli():
         elif(inp == "p"):
             mpl.play_rnd()
         elif inp=="s":
-            pl.stopAll()
+            pl.pause()
 
 
 thr = Thread(target=cli)
