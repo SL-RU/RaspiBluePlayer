@@ -1,0 +1,33 @@
+## -*- coding: utf-8 -*-
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Music player</title>
+    <link rel="stylesheet" type="text/css" href="../css/flat-table.css">
+     <style>
+   body{
+    background-color: #292929;
+   }
+  </style>
+</head>
+<body>
+<table class="flat-table">
+    <tr>
+        <th>ID</th>
+        <th>Path</th>
+    </tr>
+    % for row in enumerate(rows):
+        <tr>
+            ${makerow(row)}
+        </tr>
+    % endfor
+</table>
+<%def name="makerow(row)">
+<tr>
+    <td data-th="ID">${row[0]}</td>
+    <td data-th="Path"><a  class="music-list-link" href="play_song?id=${row[0]}">${row[1]}</a></td>
+</tr>
+</%def>
+</body>
+</html>

@@ -1,0 +1,74 @@
+.flat-table {
+font-family: sans-serif;
+-webkit-font-smoothing: antialiased;
+font-size: 115%;
+width: auto;
+overflow: auto;
+display: block;
+}
+.flat-table th {
+background-color: rgb(112, 196, 105);
+font-weight: normal;
+color: white;
+padding: 20px 30px;
+text-align: center;
+}
+.flat-table td {
+background-color: rgb(30, 30, 30);
+padding: 20px 30px;
+color: rgb(111, 111, 111);
+}
+
+
+.music-list-link {
+    padding: 20px 15px;
+    //background: #FDFDFD;
+    color: #FDFDFD;
+    text-decoration: none;
+}
+
+.button-1{
+text-align:center;
+text-decoration: none;
+font-family: sans-serif;
+-webkit-font-smoothing: antialiased;
+font-size: 150%;
+color: #FFF;
+background: #0CADA7;
+padding: 20px 60px;
+display: inline-block;
+white-space: nowrap;
+-webkit-border-radius: 5px;
+-moz-border-radius: 5px;
+border-radius: 0px;
+margin: 10px 0;
+-webkit-transition: all 0.2s ease-in-out;
+-ms-transition: all 0.2s ease-in-out;
+-moz-transition: all 0.2s ease-in-out;
+-o-transition: all 0.2s ease-in-out;
+transition: all 0.2s ease-in-out;
+}
+.button-1:hover {
+background: #0A948F;
+}
+
+
+.play-button {
+    width: 90px;
+    height: 0;
+    padding-bottom: 90px;
+    border-radius: 50%;
+    border: 0px;
+    overflow: hidden;
+    background: #40D47E;
+    box-shadow: 0 0 3px gray;
+}
+.play-button:hover {
+    background: #19B698;
+}
+.play-button img {
+    display: block;
+    width: 100%;
+    padding: 0%;
+    height: auto;
+}
