@@ -13,6 +13,7 @@ class MusicPlayer(object):
     musics = list()
     current_song = ""
     excluded_music = list()
+    was = 0
     #вызывается при старте
     def __init__(self, pth):
         self.musics = list()
@@ -22,10 +23,11 @@ class MusicPlayer(object):
             for f in couple[2]:
                 self.musics.append(couple[0] + "\\" + f)
         print(self.musics)
-        self.turn_on()
     #вызывается, когда нужно переключится в режим музыки
     def turn_on(self):
-        aplayer.set_endevent(self.on_music_ends)
+        if self.was == 0:
+            aplayer.set_endevent(self.on_eos)
+            self.was = 1
 
     #вызывается, когда нужно переключится из режима музыки
     def turn_off(self):
@@ -37,6 +39,8 @@ class MusicPlayer(object):
         self.current_song = song
         aplayer.play_file(song)
         aplayer.play()
+        self.turn_on()
+
 
     def play_rnd(self):
         if len(self.musics) > 0:
@@ -51,8 +55,9 @@ class MusicPlayer(object):
         else:
             aplayer.play()
 
-    def on_music_ends(self):
-        if(self.current_song in self.musics):
-            self.musics.remove(self.current_song)
-            self.excluded_music.append(self.current_song)
+    def on_eos(self):
+        #if(self.current_song in self.musics):
+        #    self.musics.remove(self.current_song)
+        #    self.excluded_music.append(self.current_song)
+        #pass
         self.play_rnd()

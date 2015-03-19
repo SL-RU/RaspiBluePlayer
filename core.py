@@ -15,6 +15,9 @@ path = "E:\\"
 pl.init()
 mpl = MusicPlayer(path)
 
+def run_pyglet():
+    web.start(mpl)
+
 def cli():
     inp = ""
     while True:
@@ -32,4 +35,11 @@ thr = Thread(target=cli)
 thr.setDaemon(True)
 thr.start()
 
-web.start(mpl)
+thr = Thread(target=run_pyglet)
+thr.setDaemon(True)
+thr.start()
+
+
+while True:
+    pl.update()
+    time.sleep(0.3)
