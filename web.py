@@ -31,16 +31,14 @@ class MusicPlayerWeb(object):
     player.exposed = True
 
     def play_rnd(self):
-        if(time.time() - 0.7 > self.last_play_click):
-            self.muPlayer.play_rnd()
-            self.last_play_click = time.time()
+        self.muPlayer.play_rnd()
+        self.last_play_click = time.time()
         raise cherrypy.HTTPRedirect("./")
     play_rnd.exposed = True
 
     def play_song(self, id):
-        if(time.time() - 0.7 > self.last_play_click):
-            self.muPlayer.play_song(self.muPlayer.musics[int(id)])
-            self.last_play_click = time.time()
+        self.muPlayer.play_song(self.muPlayer.musics[int(id)])
+        self.last_play_click = time.time()
         raise cherrypy.HTTPRedirect("./list")
     play_song.exposed = True
 
@@ -52,6 +50,9 @@ class MusicPlayerWeb(object):
         self.muPlayer.play()
         raise cherrypy.HTTPRedirect("./")
     play.exposed = True
+
+
+
 class WebIndex(object):
     def index(self):
         mytemplate = lookup.get_template("index.html")

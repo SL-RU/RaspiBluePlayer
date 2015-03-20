@@ -42,4 +42,3 @@ thr.start()
 
 while True:
     pl.update()
-    time.sleep(0.3)

@@ -2,56 +2,91 @@ __author__ = 'SL_RU'
 
 ###Проигрыватель музыкальных файлов
 
-import pyglet, time, sys
+import vlc, time, sys
+from queue import Queue
+
+def log(msg):
+    if not (msg.startswith('APLTASK')):
+        print(msg)
 
 def init():
-    global cur_player, song_loading
-    cur_player = None
+    global cur_player, song_loading, vlc_instance, tasks
+    vlc_instance = vlc.Instance()
+    cur_player = vlc_instance.media_player_new()
+    tasks = Queue()
     song_loading = False
     pass
 
-def play_file(file):
-    global cur_player, song_loading
-    while song_loading:
-        time.sleep(0.3)
+def _play_file(file):
+    global cur_player, song_loading, vlc_instance
     print("PLAY: requested file " + file)
     try:
         song_loading = True
-        music = pyglet.media.load(file)
-        if(cur_player == None):
-            pla = music.play()
-            cur_player = pla
-        else:
-            cur_player.pause()
-            cur_player.queue(music)
-            cur_player.next()
-            cur_player.play()
-        song_loading = False
+        music = vlc_instance.media_new(file)
+        #cur_player.stop()
+        cur_player.set_media(music)
+        cur_player.set_position(0)
+        cur_player.play()
     except:
         print("PLAY: error " + str(sys.exc_info()[0]))
     else:
         print("PLAY: playing")
+    song_loading = False
+def play_file(file):
+    _add_task('play_file', file)
 
-
-def pause():
+def _pause(a):
     global cur_player
     if(cur_player != None):
         cur_player.pause()
-def play():
+def pause():
+    _add_task('pause', None)
+
+def _play(a):
     global cur_player
     if(cur_player != None):
         cur_player.play()
+def play():
+    _add_task('play', None)
 
-
+def _set_endevent(func):
+    global cur_player
+    if(cur_player != None):
+        cur_player.event_manager().event_attach(vlc.EventType.MediaPlayerEndReached, func)
 def set_endevent(func):
-    global cur_player, end_event
-    if(cur_player != None):
-        end_event = func
+    _add_task('set_endevent', func)
 
-end_check_time = 0.5
+def _set_pos(pos):
+    global cur_player
+    if(cur_player != None and pos >= 0 and pos <= 1):
+        cur_player.set_position(pos)
+def set_pos(pos):
+    _add_task('set_pos', pos)
+
+def _set_pos(pos):
+    global cur_player
+    if(cur_player != None and pos >= 0 and pos <= 1):
+        cur_player.set_position(pos)
+def set_pos(pos):
+    _add_task('set_pos', pos)
+
+def _add_task(func, arg):
+    global tasks
+    tasks.put((func, arg))
+    log('APLTASK: added ' + func)
+
+functions = {
+    'play_file' : _play_file,
+    'pause' :_pause,
+    'set_endevent' :_set_endevent,
+    'play' : _play,
+    'set_pos' : set_pos,
+}
+
 def update():
-    global cur_player, end_event, end_check_time
-    if(cur_player != None):
-        if(cur_player.time + end_check_time >= cur_player.source.duration):
-            if(end_event != None):
-                end_event()
+    global tasks, functions
+    f = tasks.get()
+    log('APLTASK: doing ' + f[0])
+    functions[f[0]](f[1])
+    log('APLTASK: done')
+    tasks.task_done()

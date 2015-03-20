@@ -55,9 +55,11 @@ class MusicPlayer(object):
         else:
             aplayer.play()
 
-    def on_eos(self):
+    def on_eos(self, a, *args, **kwds):
         #if(self.current_song in self.musics):
         #    self.musics.remove(self.current_song)
         #    self.excluded_music.append(self.current_song)
         #pass
-        self.play_rnd()
+        if self.current_song != "":
+            self.current_song = ""
+            self.play_rnd()
