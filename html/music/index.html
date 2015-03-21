@@ -4,6 +4,7 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Music</title>
+    <script type="text/javascript" src="../js/jquery-1.11.2.min.js"></script>
     <style type="text/css">
             body, html
             {
@@ -12,16 +13,27 @@
 
             #header
             {
-                position:absolute; left: 0; right: 0; bottom: 0; top: 0px;
+                position:absolute; left: 0; right: 0; bottom: 0; top: 60px;
             }
             #list
             {
-                position:absolute; left: 0; right: 0; bottom: 0; top: 107px;
+                position:absolute; left: 0; right: 0; bottom: 0; top: 167px;
             }
     </style>
+    <script  type="text/javascript">
+    $(document).ready(function(){                            // по завершению загрузки страницы
+        $('#upd').click(function(){                    // вешаем на клик по элементу с id = example-4
+            $.getJSON('give_json', {}, function(json){  // загрузку JSON данных из файла example.json
+                $('#upd').html('');
+                                                             // заполняем DOM элемент данными из JSON объекта
+                $('#upd').append('To: '   + json.key + '<br/>')});
+        })
+    });</script>
 </head>
 <body>
+<button id="upd">Update</button>
 <div id="header"><iframe src="player" frameborder="0" width="100%" height="107px" scrolling="no"></iframe></div>
-<div id="list"><iframe src="list" frameborder="0" width="100%" height="100%" scrolling="auto"></iframe></div>
+<div id="list">
+    <iframe src="list" frameborder="0" width="100%" height="100%" scrolling="auto"></iframe></div>
 </body>
 </html>

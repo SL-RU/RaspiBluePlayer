@@ -51,7 +51,16 @@ class MusicPlayerWeb(object):
         raise cherrypy.HTTPRedirect("./")
     play.exposed = True
 
+    @cherrypy.tools.json_in()
+    def get_json(self):
+        data = cherrypy.request.json
+        print(data['key'])
+    get_json.exposed = True
 
+    @cherrypy.tools.json_out()
+    def give_json(self):
+        return {'key': self.muPlayer.current_song}
+    give_json.exposed = True
 
 class WebIndex(object):
     def index(self):

@@ -9,10 +9,14 @@ def log(msg):
     if not (msg.startswith('APLTASK')):
         print(msg)
 
+IS_BLUETOOTH_ALSA=False
+
 def init():
-    global cur_player, song_loading, vlc_instance, tasks
+    global cur_player, song_loading, vlc_instance, tasks, IS_BLUETOOTH_ALSA
     vlc_instance = vlc.Instance()
     cur_player = vlc_instance.media_player_new()
+    if(IS_BLUETOOTH_ALSA):
+        cur_player.audio_output_device_set('alsa', 'bluetooth')
     tasks = Queue()
     song_loading = False
     pass
