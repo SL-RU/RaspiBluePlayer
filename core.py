@@ -11,10 +11,10 @@ from musicplayer import MusicPlayer
 import web
 import hardware
 
-path = "/home/sl_ru/"
-IS_BLUETOOTH_ALSA=False
+path = "/home/pi/"
+IS_BLUETOOTH_ALSA=True
 IS_LINUX=True
-IS_GPIO=False
+IS_GPIO=True
 
 pl.IS_BLUETOOTH_ALSA = IS_BLUETOOTH_ALSA
 pl.IS_LINUX = IS_LINUX
@@ -44,7 +44,7 @@ def player_update():
         pl.update()
 
 def ButtonClick():
-    print("YOY!")
+    mpl.play_rnd()
 
 button = hardware.GPIOButton(4)
 button.on_press = ButtonClick

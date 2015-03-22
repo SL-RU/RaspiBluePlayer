@@ -10,7 +10,7 @@ IS_GPIO = False
 def Init():
     global thread
     if(IS_GPIO):
-        GPIO.setmode(GPIO.BOARD)
+        GPIO.setmode(GPIO.BCM)
     thread = Thread(target=Update)
     thread.setDaemon(True)
     thread.start()
@@ -20,9 +20,10 @@ def Exit():
 elements = []
 def Update():
     global elements
-    for e in elements:
-        e.Update()
-    time.sleep(0.01)
+    while True:
+        for e in elements:
+            e.Update()
+        time.sleep(0.01)
 def AddElement(el):
     global elements
     elements.append(el)
@@ -39,12 +40,13 @@ class GPIOButton(object):
     pin = 0
     last_state = 0
     press_count = 0
-    SHORT_press_count = 50
+    SHORT_press_count = 20
     LONG_press_count = 100
     def Update(self):
         st = False
         if(IS_GPIO):
             st = GPIO.input(self.pin)
+            #print(st)
         if(st):
             self.press_count += 1
         else:
