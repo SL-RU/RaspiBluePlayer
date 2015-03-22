@@ -20,12 +20,33 @@
                 position:absolute; left: 0; right: 0; bottom: 0; top: 107px;
             }
     </style>
+    <script>
+    $(document).ready(function(){
+        $("#conf").click(function(){
+           console.log("d");
 
+
+           var i = 0
+           files = document.getElementById("files").files
+           for(i=0; i<=files.length; i++){
+            var xhr = new XMLHttpRequest();
+            var data = new FormData();
+            data.append('file', document.getElementById("files").files[i]);
+            xhr.open("POST", "upload_file");
+            xhr.send(data);
+           }
+        });
+     });
+</script>
 </head>
 <body>
 <div id="header"><iframe src="player" frameborder="0" width="100%" height="107px" scrolling="no"></iframe></div>
 <div id="list">
-    <iframe src="list" frameborder="0" width="100%" height="100%" scrolling="auto"></iframe>
+    <h2>Загрузить файл</h2>
+
+    filename: <input type="file" accept=".mp3,.wav,.ogg" multiple id="files" name="file" /><br />
+    <button id="conf" type="Отправить">Отправить</button>
+
 </div>
 </body>
 </html>

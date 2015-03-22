@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title></title>
     <link rel="stylesheet" type="text/css" href="../css/flat-table.css">
+    <script type="text/javascript" src="../js/jquery-1.11.2.min.js"></script>
     <style>
     body{
         background-color: #22313F; /* Цвет фона веб-страницы */
@@ -12,23 +13,51 @@
         color: #FDFDFD;
     }
   </style>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#play_rnd').click(function(){$.ajax({url: "play_rnd", dataType: "text"});});
+            $('#play').click(function(){$.ajax({url: "play", dataType: "text"});});
+            $('#pause').click(function(){$.ajax({url: "pause", dataType: "text"});});
+            update_data();
+        });
+        window.setInterval(function(){
+            update_data();
+        }, 1000);
+        function update_data(){
+            $.getJSON('get_player_data', {}, function(json){
+                $('#cur_track').html('');
+                $('#cur_track').html(json.current_track);
+
+                $('#cur_time').html('');
+                $('#cur_time').html(json.cur_time);
+
+            });
+        }
+
+    </script>
 </head>
 <body>
 <table height="80px" border="0">
     <td>
-        <div class="play-button"><a href="play_rnd"><img src="../../img/next.png"/></a></div>
+        <div><a target="_top" href="../../"><img height="90" src="../../img/logo.png"/></a></div>
     </td>
     <td>
-        <div class="play-button"><a href="play"><img src="../../img/play.png"/></a></div>
+        <div class="play-button"><a id="play_rnd" href="#"><img src="../../img/next.png"/></a></div>
     </td>
     <td>
-        <div class="play-button"><a href="pause"><img src="../../img/pause.png"/></a></div>
+        <div class="play-button"><a id="play" href="#"><img src="../../img/play.png"/></a></div>
+    </td>
+    <td>
+        <div class="play-button"><a id="pause" href="#"><img src="../../img/pause.png"/></a></div>
     </td>
     <td>
         Current:
     </td>
     <td>
-        ${current}
+        <p id="cur_track">
+    </td>
+    <td>
+        <p id="cur_time">
     </td>
 </table>
 </body>

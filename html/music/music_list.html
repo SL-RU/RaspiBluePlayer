@@ -4,30 +4,52 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Music player</title>
+    <script type="text/javascript" src="../js/jquery-1.11.2.min.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/flat-table.css">
-     <style>
-   body{
-    background-color: #292929;
-   }
+    <style>
+        body{
+            background-color: #292929;
+        }
   </style>
+  <script>
+      function play_track(id)
+      {
+        $.ajax({url: "play_song?id=" + id, dataType: "text"});
+      }
+      $(document).ready(function(){
+      get_data();
+      });
+      function get_data()
+      {
+        $.getJSON('get_music_list_data', {}, function(json){
+            $('#table').find('tbody').html('<tr><th>ID</th><th>Path</th><th>State</th></tr>');
+            var excl = []
+            for(var i in json.excluded){
+                excl.push(json.excluded[i])
+            }
+            for( var i in json.all){
+                var st = "will";
+                if(excl.indexOf(json.all[i]) >= 0){
+                st = "was"
+                }
+                if(json.all[i] == json.current){
+                st = "now"
+                }
+                $('#table').find('tbody').append('<tr> <td data-th="ID">' + i + '</td>' +
+                '<td data-th="Path"><a onclick="play_track(' + i + ')" class="music-list-link" href=#">' + json.all[i] + '</a></td>' +
+                    '<td data-th="State">' + st + '</td></tr>')
+            }
+        });
+      }
+      window.setInterval(function(){
+      get_data();
+        }, 5000);
+  </script>
 </head>
 <body>
-<table class="flat-table">
-    <tr>
-        <th>ID</th>
-        <th>Path</th>
-    </tr>
-    % for row in enumerate(rows):
-        <tr>
-            ${makerow(row)}
-        </tr>
-    % endfor
+<a onclick="get_data()" class="music-list-link" href=#">FUUUUU</a>
+<table id="table" class="flat-table" width="100%">
+    <tr><th>ID</th><th>Path</th><th>State</th></tr>
 </table>
-<%def name="makerow(row)">
-<tr>
-    <td data-th="ID">${row[0]}</td>
-    <td data-th="Path"><a  class="music-list-link" href="play_song?id=${row[0]}">${row[1]}</a></td>
-</tr>
-</%def>
 </body>
 </html>

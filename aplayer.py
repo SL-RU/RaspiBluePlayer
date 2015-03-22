@@ -10,31 +10,35 @@ def log(msg):
         print(msg)
 
 IS_BLUETOOTH_ALSA=False
+IS_LINUX=False
 
 def init():
-    global cur_player, song_loading, vlc_instance, tasks, IS_BLUETOOTH_ALSA
+    global cur_player, song_loading, vlc_instance, tasks, IS_BLUETOOTH_ALSA, cur_media
     vlc_instance = vlc.Instance()
     cur_player = vlc_instance.media_player_new()
     if(IS_BLUETOOTH_ALSA):
         cur_player.audio_output_device_set('alsa', 'bluetooth')
     tasks = Queue()
     song_loading = False
+    cur_media = None
     pass
 
 def _play_file(file):
-    global cur_player, song_loading, vlc_instance
+    global cur_player, song_loading, vlc_instance, cur_media
     print("PLAY: requested file " + file)
-    try:
-        song_loading = True
-        music = vlc_instance.media_new(file)
-        #cur_player.stop()
-        cur_player.set_media(music)
-        cur_player.set_position(0)
-        cur_player.play()
-    except:
-        print("PLAY: error " + str(sys.exc_info()[0]))
-    else:
-        print("PLAY: playing")
+    #try:
+    song_loading = True
+    if(not IS_LINUX):
+        file = str(file.encode('utf-8').decode('cp1251'))
+    cur_media = vlc_instance.media_new(file)
+    #cur_player.stop()
+    cur_player.set_media(cur_media)
+    cur_player.set_position(0)
+    cur_player.play()
+    #except:
+    #    print("PLAY: error " + str(sys.exc_info()[0]))
+    #else:
+    #    print("PLAY: playing")
     song_loading = False
 def play_file(file):
     _add_task('play_file', file)
@@ -73,6 +77,15 @@ def _set_pos(pos):
         cur_player.set_position(pos)
 def set_pos(pos):
     _add_task('set_pos', pos)
+
+def get_pos():
+    global cur_player
+    return cur_player.get_position()
+def get_duration():
+    global cur_player, cur_media
+    if(cur_media != None):
+        return cur_media.get_duration() / 1000
+
 
 def _add_task(func, arg):
     global tasks
