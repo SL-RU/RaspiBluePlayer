@@ -9,11 +9,20 @@ import time
 import aplayer as pl
 from musicplayer import MusicPlayer
 import web
+import hardware
 
-path = "E:\\"
+path = "/home/sl_ru/"
+IS_BLUETOOTH_ALSA=False
+IS_LINUX=True
+IS_GPIO=False
+
+pl.IS_BLUETOOTH_ALSA = IS_BLUETOOTH_ALSA
+pl.IS_LINUX = IS_LINUX
+hardware.IS_GPIO = IS_GPIO
 
 pl.init()
 mpl = MusicPlayer(path)
+hardware.Init()
 
 def run_web():
     web.start(mpl)
@@ -34,6 +43,11 @@ def player_update():
     while True:
         pl.update()
 
+def ButtonClick():
+    print("YOY!")
+
+button = hardware.GPIOButton(4)
+button.on_press = ButtonClick
 
 thr_web = Thread(target=run_web)
 thr_web.setDaemon(True)

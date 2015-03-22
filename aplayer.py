@@ -10,7 +10,7 @@ def log(msg):
         print(msg)
 
 IS_BLUETOOTH_ALSA=False
-IS_LINUX=False
+IS_LINUX=True
 
 def init():
     global cur_player, song_loading, vlc_instance, tasks, IS_BLUETOOTH_ALSA, cur_media
