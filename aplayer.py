@@ -23,6 +23,12 @@ def init():
     cur_media = None
     pass
 
+def conn():
+    _add_task("conn", None)
+def connect_bluetooth(a):
+    global cur_player
+    cur_player.audio_output_device_set('alsa', 'bluetooth')
+
 def _play_file(file):
     global cur_player, song_loading, vlc_instance, cur_media
     print("PLAY: requested file " + file)
@@ -98,6 +104,7 @@ functions = {
     'set_endevent' :_set_endevent,
     'play' : _play,
     'set_pos' : set_pos,
+    'conn' : connect_bluetooth,
 }
 
 def update():

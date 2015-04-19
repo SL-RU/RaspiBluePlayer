@@ -34,13 +34,13 @@ def RemoveElemment(el):
 class GPIOButton(object):
     def __init__(self, pin):
         if(IS_GPIO):
-            GPIO.setup(pin, GPIO.IN)
+            GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         self.pin = pin
         AddElement(self)
     pin = 0
     last_state = 0
     press_count = 0
-    SHORT_press_count = 20
+    SHORT_press_count = 5
     LONG_press_count = 100
     def Update(self):
         st = False

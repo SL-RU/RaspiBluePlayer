@@ -5,10 +5,11 @@ __author__ = 'SL_RU'
 ##from queue import Thread
 
 from threading import Thread
-import time
+import time, os
 import aplayer as pl
-from musicplayer import MusicPlayer
-import web
+import musicplayer as muspl
+#from musicplayer import MusicPlayer
+#import web
 import hardware
 
 path = "/home/pi/"
@@ -21,11 +22,13 @@ pl.IS_LINUX = IS_LINUX
 hardware.IS_GPIO = IS_GPIO
 
 pl.init()
-mpl = MusicPlayer(path)
+mpl = muspl.MusicPlayer(path)
 hardware.Init()
 
-def run_web():
-    web.start(mpl)
+mpl.pause()
+
+#def run_web():
+#    web.start(mpl)
 
 def cli():
     inp = ""
@@ -44,22 +47,38 @@ def player_update():
         pl.update()
 
 def ButtonClick():
-    mpl.play_rnd()
+    mpl.pause()
 
-button = hardware.GPIOButton(4)
+button = hardware.GPIOButton(24)
 button.on_press = ButtonClick
 
-thr_web = Thread(target=run_web)
-thr_web.setDaemon(True)
-thr_web.start()
+halt = hardware.GPIOButton(22)
+def haltButton():
+    mpl.turn_off()
+    os.system("sudo halt")
+halt.on_long_press = haltButton
+def bt():
+    print("lol")
+    muspl.aplayer.conn()
+halt.on_press = bt
+halt.LONG_press_count = 400
+next = hardware.GPIOButton(23)
+def nextButton():
+    mpl.play_rnd()
+next.on_press = nextButton
+
+
+#thr_web = Thread(target=run_web)
+#thr_web.setDaemon(True)
+#thr_web.start()
 
 thr_player = Thread(target=player_update)
 thr_player.setDaemon(True)
 thr_player.start()
 
 thr_cli = Thread(target=cli)
-thr_cli.setDaemon(True)
+#thr_cli.setDaemon(True)
 thr_cli.start()
-thr_cli.join()
+thr_player.join()
 
 mpl.turn_off()
