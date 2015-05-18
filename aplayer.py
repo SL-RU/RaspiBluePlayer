@@ -1,116 +1,124 @@
 __author__ = 'SL_RU'
+# -*- coding: utf-8 -*-
+#Проигрыватель музыкальных файлов
 
-###Проигрыватель музыкальных файлов
-
-import vlc, time, sys
+import vlc
+#import time
+#import sys
 from queue import Queue
 
+
 def log(msg):
-    if not (msg.startswith('APLTASK')):
-        print(msg)
-
-IS_BLUETOOTH_ALSA=False
-IS_LINUX=True
-
-def init():
-    global cur_player, song_loading, vlc_instance, tasks, IS_BLUETOOTH_ALSA, cur_media
-    vlc_instance = vlc.Instance()
-    cur_player = vlc_instance.media_player_new()
-    if(IS_BLUETOOTH_ALSA):
-        cur_player.audio_output_device_set('alsa', 'bluetooth')
-    tasks = Queue()
-    song_loading = False
-    cur_media = None
-    pass
-
-def conn():
-    _add_task("conn", None)
-def connect_bluetooth(a):
-    global cur_player
-    cur_player.audio_output_device_set('alsa', 'bluetooth')
-
-def _play_file(file):
-    global cur_player, song_loading, vlc_instance, cur_media
-    print("PLAY: requested file " + file)
-    #try:
-    song_loading = True
-    if(not IS_LINUX):
-        file = str(file.encode('utf-8').decode('cp1251'))
-    cur_media = vlc_instance.media_new(file)
-    #cur_player.stop()
-    cur_player.set_media(cur_media)
-    cur_player.set_position(0)
-    cur_player.play()
-    #except:
-    #    print("PLAY: error " + str(sys.exc_info()[0]))
-    #else:
-    #    print("PLAY: playing")
-    song_loading = False
-def play_file(file):
-    _add_task('play_file', file)
-
-def _pause(a):
-    global cur_player
-    if(cur_player != None):
-        cur_player.pause()
-def pause():
-    _add_task('pause', None)
-
-def _play(a):
-    global cur_player
-    if(cur_player != None):
-        cur_player.play()
-def play():
-    _add_task('play', None)
-
-def _set_endevent(func):
-    global cur_player
-    if(cur_player != None):
-        cur_player.event_manager().event_attach(vlc.EventType.MediaPlayerEndReached, func)
-def set_endevent(func):
-    _add_task('set_endevent', func)
-
-def _set_pos(pos):
-    global cur_player
-    if(cur_player != None and pos >= 0 and pos <= 1):
-        cur_player.set_position(pos)
-def set_pos(pos):
-    _add_task('set_pos', pos)
-
-def _set_pos(pos):
-    global cur_player
-    if(cur_player != None and pos >= 0 and pos <= 1):
-        cur_player.set_position(pos)
-def set_pos(pos):
-    _add_task('set_pos', pos)
-
-def get_pos():
-    global cur_player
-    return cur_player.get_position()
-def get_duration():
-    global cur_player, cur_media
-    if(cur_media != None):
-        return cur_media.get_duration() / 1000
+    print(msg)
 
 
-def _add_task(func, arg):
-    global tasks
-    tasks.put((func, arg))
-    log('APLTASK: added ' + func)
+class Aplayer(object):
+    def __init__(self, output_device):
+        """Initializing Aplayer.
+            output_device can be:
+               'bt' - blutooth,
+               'hw' - audio jack,
+               'hdmi'
+            """
+        self.init_functions()
+        self.vlc_instance = vlc.Instance()
+        self.cur_player = self.vlc_instance.media_player_new()
+#        if(output_device == "bt"):
+#            self.cur_player.audio_output_device_set('alsa', 'bluetooth')
+        self.tasks = Queue()
+        self.song_loading = False
+        self.cur_media = None
 
-functions = {
-    'play_file' : _play_file,
-    'pause' :_pause,
-    'set_endevent' :_set_endevent,
-    'play' : _play,
-    'set_pos' : set_pos,
-    'conn' : connect_bluetooth,
-}
+    def connect_bluetooth(self, a):
+        self.cur_player.audio_output_device_set('alsa', 'bluetooth')
 
-def update():
-    global tasks, functions
-    f = tasks.get()
-    log('APLTASK: doing ' + f[0])
-    functions[f[0]](f[1])
-    log('APLTASK: done')
-    tasks.task_done()
+    def _play_file(self, fl):
+        print("PLAY: requested file " + fl)
+        self.song_loading = True
+        self.cur_media = self.vlc_instance.media_new(fl)
+        self.cur_player.set_media(self.cur_media)
+        self.cur_player.set_position(0)
+        self.cur_player.play()
+        self.song_loading = False
+
+    def play_file(self, fl):
+        """Load and play requested media file"""
+        self._add_task('play_file', fl)
+
+    def _pause(self, a=0):
+        if(self.cur_player is not None):
+            self.cur_player.pause()
+
+    def pause(self):
+        """Pause playing media"""
+        self._add_task('pause', 0)
+
+    def _play(self, a=0):
+        if(self.cur_player is not None):
+            self.cur_player.play()
+
+    def play(self):
+        """Continue playing after pause()"""
+        self._add_task('play', None)
+
+    def _add_endevent(self, func):
+        if(self.cur_player is not None):
+            self.cur_player.event_manager().event_attach(vlc.EventType.MediaPlayerEndReached, func)
+
+    def add_endevent(self, func):
+        """Set function, which will be executed after audio file's end.
+            func - function, which will be executed"""
+        self._add_task('add_endevent', func)
+
+    def _rem_endevent(self, func):
+#implement!
+        pass
+
+    def rem_endevent(self, func):
+        self._add_task("rem_endevent")
+
+    def _set_pos(self, pos):
+        #global self.cur_player
+        if(self.cur_player != None and pos >= 0 and pos <= 1):
+            self.cur_player.set_position(pos)
+    def set_pos(self, pos):
+       self._add_task('set_pos', pos)
+    
+    def _set_pos(self, pos):
+        #global self.cur_player
+        if(self.cur_player != None and pos >= 0 and pos <= 1):
+            self.cur_player.set_position(pos)
+    def set_pos(self, pos):
+       self._add_task('set_pos', pos)
+    
+    def get_pos(self):
+        #global self.cur_player
+        return self.cur_player.get_position()
+    def get_duration(self):
+        #global self.cur_player, self.cur_media
+        if(self.cur_media != None):
+            return self.cur_media.get_duration() / 1000
+
+    def _add_task(self, func, arg):
+        self.tasks.put((func, arg))
+        log('APLTASK: added ' + func)
+
+    def init_functions(self):
+        self.functions = {
+            'play_file': self._play_file,
+            'pause': self._pause,
+            'add_endevent': self._add_endevent,
+            'play': self._play,
+            'set_pos': self.set_pos,
+            'rem_endevent': self._rem_endevent,       
+        }
+
+    def update(self):
+        #global self.tasks, functions
+        f = self.tasks.get()
+        print(self.functions)
+        print(f)
+        print('APLTASK: doing ' + f[0])
+        self.functions[f[0]](f[1])
+        print('APLTASK: done')
+        self.tasks.task_done()
