@@ -28,6 +28,7 @@ class Aplayer(object):
         self.tasks = Queue()
         self.song_loading = False
         self.cur_media = None
+        self.cur_player.event_manager().event_attach(vlc.EventType.MediaPlayerEndReached, self.on_end_event)
 
     def connect_bluetooth(self, a):
         self.cur_player.audio_output_device_set('alsa', 'bluetooth')
@@ -61,21 +62,19 @@ class Aplayer(object):
         """Continue playing after pause()"""
         self._add_task('play', None)
 
-    def _add_endevent(self, func):
-        if(self.cur_player is not None):
-            self.cur_player.event_manager().event_attach(vlc.EventType.MediaPlayerEndReached, func)
+    end_event_handlers = list()
 
     def add_endevent(self, func):
         """Set function, which will be executed after audio file's end.
             func - function, which will be executed"""
-        self._add_task('add_endevent', func)
-
-    def _rem_endevent(self, func):
-#implement!
-        pass
+        self.end_event_handlers.append(func)
 
     def rem_endevent(self, func):
-        self._add_task("rem_endevent")
+        self.end_event_handlers.remove(func)
+
+    def on_end_event(self, s):
+        for i in self.end_event_handlers:
+            i()
 
     def _set_pos(self, pos):
         #global self.cur_player
@@ -107,18 +106,19 @@ class Aplayer(object):
         self.functions = {
             'play_file': self._play_file,
             'pause': self._pause,
-            'add_endevent': self._add_endevent,
+#            'add_endevent': self._add_endevent,
             'play': self._play,
             'set_pos': self.set_pos,
-            'rem_endevent': self._rem_endevent,       
+#            'rem_endevent': self._rem_endevent,       
         }
 
+    def turn_off():
+        pass
+
     def update(self):
-        #global self.tasks, functions
         f = self.tasks.get()
-        print(self.functions)
         print(f)
-        print('APLTASK: doing ' + f[0])
+        log('TASK: doing ' + f[0])
         self.functions[f[0]](f[1])
-        print('APLTASK: done')
+        log('TASK: done')
         self.tasks.task_done()

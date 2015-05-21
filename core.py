@@ -13,8 +13,8 @@ pl = aplayer.Aplayer("hw")
 
 path = "/mnt/doc/music/"
 
-muspl = musicplayer.MusicPlayer(pl, path) 
-
+muspl = musicplayer.MusicPlayer(pl, path)
+muspl.load()
 def cli():
     global path, muspl
     inp = ""
@@ -28,8 +28,19 @@ def cli():
         elif inp is "s":
             pl.pause()
         if inp is "p":
-            muspl.play_next()
-
+            muspl.play()
+        if inp is "f":
+            muspl.play_forw()
+        if inp is "k": #skip
+            muspl.on_song_end()
+        if inp.startswith("pl "):
+            muspl.play_song_by_name(inp[3:])
+        if inp.startswith("save"):
+            print("saving player")
+            muspl.save()
+        if inp.startswith("load"):
+            print("load player")
+            muspl.load()
 
 def player_update():
     while True:

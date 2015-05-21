@@ -1,0 +1,15 @@
+class SmthPlayer(object):
+    def set_aplayer(apl):
+        pass
+
+    def get_aplayer():
+        pass
+
+    def play():
+        pass
+
+    def play_forw():
+        pass
+
+    def play_back():
+        pass
