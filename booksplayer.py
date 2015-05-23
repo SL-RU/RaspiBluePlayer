@@ -8,42 +8,38 @@ import random
 import json
 import aplayer
 import musicplaylist
+import audiobook
+
 
 def log(s):
-    print("MUSIC_PLAYER:" + s)
+    print("BOOKS_PLAYER:" + s)
 
-class MusicPlayer(object):
+
+class BooksPlayer(object):
     aplayer = None
-    songs = list()
-    cur_song = ""
+    books = list()
+    cur_book = None
     path = ""
-    cur_playlist = None
-    
+
     def __init__(self, audioPlayer, path):
         self.set_aplayer(audioPlayer)
         self.path = path
-        self.create_playlist()
+        #self.create_playlist()
         self.turn_on()
 
     def refresh_path(self):
         """Find and enumerate all audio files in the path"""
-        self.songs = list()
-        wa = os.walk(self.path)
-        for couple in wa:
-            for f in couple[2]:
-                if(f.endswith('.mp3') or f.endswith('.wav') or f.endswith('.ogg')):
-                    self.add_file(couple[0] + "/" + f)
+        self.books = list()
+        wa = list(os.walk(self.path))[0]
+        for i in wa[1]:
+            self.books.append(i)
 
-    def add_file(self, f):
-        if (f.endswith('.mp3') or f.endswith('.wav') or f.endswith('.ogg')) and f.startswith(self.path):
-#            leng = len(self.musics_all.values())
-            self.songs.append(f[len(self.path):])
-            log(f[len(self.path):])
-
-    def play_audio_by_name(self, name):
-        if(aplayer is not None) and os.path.isfile(self.path + name):
+    def play_audio_by_name(self, name, offset=0):
+        if(self.aplayer is not None) and os.path.isfile(self.path + name):
             b = self.aplayer.play_file(self.path + name)
+            self.aplayer.set_pos(offset)
             self.cur_song = name
+            log("playing" + name)
             return b
         else:
             return False
@@ -56,6 +52,13 @@ class MusicPlayer(object):
     def get_aplayer(self):
         return aplayer
 
+    def play_book(self, name):
+        """Starting or continueing playing book. If other book playing in this time, it will be saved and stopped"""
+        if(self.cur_book is not None):
+            self.cur_book.save()
+        self.cur_book = audiobook.Audiobook(self, name)
+        log("Cur book is " + name)
+
     def play(self):
         if(self.aplayer is not None):
             self.aplayer.play()
@@ -65,16 +68,17 @@ class MusicPlayer(object):
             self.aplayer.pause()
 
     def play_forw(self):
-        if self.cur_playlist is not None:
-            s = self.cur_playlist.get_cur_song()
-            if s is not None:
-                self.play_song_by_name(s)
+        #if(self.cur_book is not None):
+        log("lfdfghjk")
+        a = self.cur_book.get_next()
+        log(a)
+        self.play_audio_by_name(a)
 
     def play_back(self):
         pass
 
     def load(self):
-        self.load_playlist()
+        #self.load_playlist()
         if(os.path.isfile(self.path + "booksplayer.json")):
             with open(self.path + "booksplayer.json", "r") as fl:
                 dt = json.load(fl)
@@ -82,15 +86,16 @@ class MusicPlayer(object):
 
     def save(self):
         dt = {
+            
             }
-        self.save_playlist()
+        #self.save_playlist()
         with open(self.path + "booksplayer.json", "w") as fl:
             json.dump(dt, fl)
             fl.close()
 
     def turn_on(self):
         self.refresh_path()
-        self.aplayer.add_endevent(self.on_song_end)
+        self.aplayer.add_endevent(self.on_audio_end)
 
     def turn_off(self):
         if(self.aplayer is not None):
@@ -101,3 +106,7 @@ class MusicPlayer(object):
 
     def on_audio_end(self):
         self.play_forw()
+
+    def play_pos(self, p):
+        b = self.cur_book.get_audio_and_time_by_pos(p)
+        self.play_audio_by_name(b[0], offset=b[1])

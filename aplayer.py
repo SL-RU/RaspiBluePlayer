@@ -76,17 +76,16 @@ class Aplayer(object):
         for i in self.end_event_handlers:
             i()
 
-    def _set_pos(self, pos):
-        #global self.cur_player
-        if(self.cur_player != None and pos >= 0 and pos <= 1):
-            self.cur_player.set_position(pos)
     def set_pos(self, pos):
        self._add_task('set_pos', pos)
     
     def _set_pos(self, pos):
         #global self.cur_player
-        if(self.cur_player != None and pos >= 0 and pos <= 1):
-            self.cur_player.set_position(pos)
+        if(self.cur_player != None and pos >= 0 and pos <= self.get_duration()):
+            log("setting pos " + str(pos/self.get_duration()))
+            self.cur_player.set_position(pos/self.get_duration())
+        else:
+            log("invalid position. Duration: " + str(self.get_duration()))
     def set_pos(self, pos):
        self._add_task('set_pos', pos)
     
@@ -108,7 +107,7 @@ class Aplayer(object):
             'pause': self._pause,
 #            'add_endevent': self._add_endevent,
             'play': self._play,
-            'set_pos': self.set_pos,
+            'set_pos': self._set_pos,
 #            'rem_endevent': self._rem_endevent,       
         }
 
@@ -122,3 +121,5 @@ class Aplayer(object):
         self.functions[f[0]](f[1])
         log('TASK: done')
         self.tasks.task_done()
+
+        

@@ -9,11 +9,12 @@ from threading import Thread
 import time, os
 import aplayer
 import musicplayer
+import booksplayer
 pl = aplayer.Aplayer("hw")
 
 path = "/mnt/doc/music/"
 
-muspl = musicplayer.MusicPlayer(pl, path)
+muspl = booksplayer.BooksPlayer(pl, path)
 muspl.load()
 def cli():
     global path, muspl
@@ -32,9 +33,11 @@ def cli():
         if inp is "f":
             muspl.play_forw()
         if inp is "k": #skip
-            muspl.on_song_end()
+            muspl.on_audio_end()
         if inp.startswith("pl "):
-            muspl.play_song_by_name(inp[3:])
+            muspl.play_book(inp[3:])
+        if inp.startswith("pp "):
+            muspl.play_pos(int(inp[3:]))
         if inp.startswith("save"):
             print("saving player")
             muspl.save()
@@ -45,6 +48,7 @@ def cli():
 def player_update():
     while True:
         pl.update()
+        time.sleep(0.06)
 
 
 thr_player = Thread(target=player_update)
