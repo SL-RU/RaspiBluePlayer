@@ -91,7 +91,7 @@ class Aplayer(object):
     
     def get_pos(self):
         #global self.cur_player
-        return self.cur_player.get_position()
+        return self.cur_player.get_position() * self.get_duration()
     def get_duration(self):
         #global self.cur_player, self.cur_media
         if(self.cur_media != None):

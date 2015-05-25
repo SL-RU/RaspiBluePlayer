@@ -12,7 +12,7 @@ import musicplayer
 import booksplayer
 pl = aplayer.Aplayer("hw")
 
-path = "/mnt/doc/music/"
+path = "/mnt/doc/audiobooks/"
 
 muspl = booksplayer.BooksPlayer(pl, path)
 muspl.load()
