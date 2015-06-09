@@ -95,7 +95,7 @@ class MusicPlayer(object):
 
     def turn_on(self):
         self.refresh_path()
-        self.aplayer.add_endevent(self.on_song_end)
+        self.aplayer.add_endevent(self.on_audio_end)
 
     def turn_off(self):
         if(self.aplayer is not None):
@@ -123,7 +123,7 @@ class MusicPlayer(object):
         if(self.cur_playlist is not None):
             self.cur_playlist.save(fl)
 
-    def on_song_end(self):
+    def on_audio_end(self):
         if(self.cur_playlist is not None):
             self.cur_playlist.song_played(self.cur_song)
             self.play_forw()

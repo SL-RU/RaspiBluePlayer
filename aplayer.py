@@ -23,8 +23,8 @@ class Aplayer(object):
         self.init_functions()
         self.vlc_instance = vlc.Instance()
         self.cur_player = self.vlc_instance.media_player_new()
-#        if(output_device == "bt"):
-#            self.cur_player.audio_output_device_set('alsa', 'bluetooth')
+        if(output_device == "bt"):
+            self.cur_player.audio_output_device_set('alsa', 'bluetooth')
         self.tasks = Queue()
         self.song_loading = False
         self.cur_media = None

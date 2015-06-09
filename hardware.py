@@ -5,12 +5,12 @@ import time
 from threading import Thread
 
 ##Взаимодействие с gpio, блютус и прочим хардваре
-IS_GPIO = False
+IS_GPIO = True
 
 def Init():
     global thread
     if(IS_GPIO):
-        GPIO.setmode(GPIO.BCM)
+        GPIO.setmode(GPIO.BOARD)
     thread = Thread(target=Update)
     thread.setDaemon(True)
     thread.start()
@@ -40,7 +40,7 @@ class GPIOButton(object):
     pin = 0
     last_state = 0
     press_count = 0
-    SHORT_press_count = 5
+    SHORT_press_count = 10
     LONG_press_count = 100
     def Update(self):
         st = False
@@ -60,3 +60,18 @@ class GPIOButton(object):
             self.press_count = 0
     on_press = None
     on_long_press = None
+
+class GPIOLed(object):
+    def __init__(self, pin):
+        if(IS_GPIO):
+            GPIO.setup(pin, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN)
+        self.pin = pin
+        AddElement(self)
+
+    pin = 0
+
+    def set(self, state):
+        GPIO.output(self.pin, not state)
+
+    def Update(self):
+        pass
