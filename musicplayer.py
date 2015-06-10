@@ -10,7 +10,10 @@ import aplayer
 import musicplaylist
 
 def log(s):
-    print("MUSIC_PLAYER:" + s)
+    try:
+        print("MUSIC_PLAYER:" + s)
+    except:
+        pass
 
 class MusicPlayer(object):
     aplayer = None

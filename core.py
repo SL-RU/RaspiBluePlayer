@@ -48,9 +48,15 @@ path = "/home/pi/music/"
 #bookpl = booksplayer.BooksPlayer(pl, path)
 muspl = musicplayer.MusicPlayer(pl, path)
 
+leds[0].set(True)
+leds[1].set(False)
+
+hardware.SetIndLed(leds[1])
+
 curpl = muspl
 
 curpl.load()
+muspl.create_playlist()
 def cli():
     global path, curpl
     inp = ""
@@ -69,43 +75,104 @@ def cli():
             curpl.play_forw()
         if inp is "k": #skip
             curpl.on_audio_end()
-        if inp.startswith("pl "):
-            curpl.play_book(inp[3:])
-        if inp.startswith("pp "):
-            curpl.play_pos(int(inp[3:]))
         if inp.startswith("save"):
             print("saving player")
             curpl.save()
         if inp.startswith("load"):
             print("load player")
             curpl.load()
-        if inp.startswith("cr_pl"):
-            print("creating playlist")
-            curpl.create_playlist()
 
 def player_update():
     while True:
         pl.update()
-        time.sleep(0.06)
+        time.sleep(0.09)
 
+class HardwareControl(object):
+    def __init__(self, buttons, leds, blue):
+        self.buttons = buttons
+        self.leds = leds
+        self.blue = blue
+        self.init_keys()
 
+    aplayer = None
+    playing = False
+    player = None
 
+    def init_keys(self):
+        self.buttons[4].click = self.play_pause_b
+        self.blue.events[2] = self.play_b
+        self.blue.events[3] = self.pause_b
+        
+        self.buttons[6].click = self.skip_b
+        self.blue.events[4] = self.skip_b
+
+        self.buttons[8].press = self.halt_p
+
+        self.buttons[7].click = self.conn_b
+        self.buttons[5].click = self.forw_b
+        
+    def play_pause_b(self):
+        print("play_pause button")
+        if (self.aplayer is not None and self.player is not None):
+            if self.aplayer.playing:
+                self.player.pause()
+            else:
+                self.player.play()
+
+    def play_b(self):
+        print("Play button")
+        if (self.aplayer is not None and self.player is not None):
+            self.player.play()
+
+    def pause_b(self):
+        if (self.aplayer is not None and self.player is not None):
+            self.player.pause()
+
+    def skip_b(self):
+        if (self.aplayer is not None and self.player is not None):
+            self.player.on_audio_end()
+
+    def forw_b(self):
+        print("forw button")
+        if (self.aplayer is not None and self.player is not None):
+            self.player.play_forw()
+
+    def back_b(self):
+        if (self.aplayer is not None and self.player is not None):
+            pass
+
+    def conn_b(self):
+        print("connect button")
+        os.system("sudo bt-audio -c " + headset_MAC)
+
+    def halt_p(self):
+        print("halt button")
+        os.system("sudo halt")
+        
+cc = HardwareControl(buttons, leds, blueh)
+cc.aplayer = pl
+cc.player = curpl
+        
 thr_player = Thread(target=player_update)
 thr_player.setDaemon(True)
 thr_player.start()
+print("Player thread started")
 
 thr_hardware = Thread(target=hardware.Update)
 thr_hardware.setDaemon(True)
 thr_hardware.start()
+print("hardware thread started")
 
-thr_blue_ev = Thread(target=blueh.Update())
+thr_blue_ev = Thread(target=blueh.Update)
 thr_blue_ev.setDaemon(True)
 thr_blue_ev.start()
+print("Bluetooth headset event's thread started")
+thr_blue_ev.join()
 
-thr_cli = Thread(target=cli)
-thr_cli.setDaemon(True)
-thr_cli.start()
-thr_cli.join()
+#thr_cli = Thread(target=cli)
+#thr_cli.setDaemon(True)
+#thr_cli.start()
+#thr_cli.join()
 
-
+print("Halting")
 hardware.Exit()

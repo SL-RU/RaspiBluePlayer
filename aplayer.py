@@ -9,8 +9,8 @@ from queue import Queue
 
 
 def log(msg):
-    print(msg)
-
+    #print(msg)
+    pass
 
 class Aplayer(object):
     def __init__(self, output_device):
@@ -25,22 +25,27 @@ class Aplayer(object):
         self.cur_player = self.vlc_instance.media_player_new()
         if(output_device == "bt"):
             self.cur_player.audio_output_device_set('alsa', 'bluetooth')
+        if(output_device == "hdmi"):
+            self.cur_player.audio_output_device_set('alsa', 'hdmi')
         self.tasks = Queue()
         self.song_loading = False
         self.cur_media = None
         self.cur_player.event_manager().event_attach(vlc.EventType.MediaPlayerEndReached, self.on_end_event)
 
+    playing = False
+        
     def connect_bluetooth(self, a):
         self.cur_player.audio_output_device_set('alsa', 'bluetooth')
 
     def _play_file(self, fl):
-        print("PLAY: requested file " + fl)
+        log("PLAY: requested file " + fl)
         self.song_loading = True
         self.cur_media = self.vlc_instance.media_new(fl)
         self.cur_player.set_media(self.cur_media)
         self.cur_player.set_position(0)
         self.cur_player.play()
         self.song_loading = False
+        self.playing = True
 
     def play_file(self, fl):
         """Load and play requested media file"""
@@ -49,6 +54,7 @@ class Aplayer(object):
     def _pause(self, a=0):
         if(self.cur_player is not None):
             self.cur_player.pause()
+            self.playing = False
 
     def pause(self):
         """Pause playing media"""
@@ -57,6 +63,7 @@ class Aplayer(object):
     def _play(self, a=0):
         if(self.cur_player is not None):
             self.cur_player.play()
+            self.playing = True
 
     def play(self):
         """Continue playing after pause()"""
@@ -75,6 +82,7 @@ class Aplayer(object):
     def on_end_event(self, s):
         for i in self.end_event_handlers:
             i()
+        self.playing = False
 
     def set_pos(self, pos):
        self._add_task('set_pos', pos)
