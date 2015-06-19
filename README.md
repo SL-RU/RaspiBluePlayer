@@ -23,9 +23,9 @@ Obsolete:
 * basic web interface (not developing anymore)
 
 ##Resources
-For playing audio I'm using VLC python bindings https://wiki.videolan.org/Python_bindings
-For web interface: CherryP http://www.cherrypy.org/
-LCD library: https://github.com/BLavery/lib_oled96
+- For playing audio I'm using VLC python bindings https://wiki.videolan.org/Python_bindings
+- For web interface: CherryP http://www.cherrypy.org/
+- LCD library: https://github.com/BLavery/lib_oled96
 
 
 ##License
