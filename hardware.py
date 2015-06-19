@@ -51,27 +51,33 @@ class GPIOButton(object):
     press_count = 0
     SHORT_press_count = 15
     LONG_press_count = 150
+    DELAY_count=50
+    delay_count=0
     def Update(self):
-        st = False
-        if(IS_GPIO):
-            st = GPIO.input(self.pin)
-            #print(st)
-        if(st):
-            self.press_count += 1
-            if (self.press_count == self.SHORT_press_count):
-                PressIndicate()
-            elif self.press_count > self.LONG_press_count:
-                PressIndicate()
+        if(self.delay_count > 0):
+            self.delay_count -= 1
         else:
-            c = self.press_count
-            self.press_count = 0
-            if(c >= self.SHORT_press_count):
-                if(c > self.LONG_press_count):
-                    if(self.press != None):
-                        self.press()
-                else:
-                    if(self.click != None):
-                        self.click()
+            st = False
+            if(IS_GPIO):
+                st = GPIO.input(self.pin)
+                #print(st)
+            if(st):
+                self.press_count += 1
+                if (self.press_count == self.SHORT_press_count):
+                    PressIndicate()
+                elif self.press_count > self.LONG_press_count:
+                    PressIndicate()
+            else:
+                c = self.press_count
+                self.press_count = 0
+                if(c >= self.SHORT_press_count):
+                    if(c > self.LONG_press_count):
+                        if(self.press != None):
+                            self.press()
+                    else:
+                        if(self.click != None):
+                            self.click()
+                    self.delay_count = self.DELAY_count
     press = None
     click = None
 
@@ -83,6 +89,7 @@ class GPIOLed(object):
         AddElement(self)
 
     pin = 0
+    
     blink_dur = 0
     blink_start_time = -100
 

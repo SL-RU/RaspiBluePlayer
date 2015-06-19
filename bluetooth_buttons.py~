@@ -1,3 +1,0 @@
-from evdev import InputDevice
-
-dev = InputDevice('/dev/input/event2')

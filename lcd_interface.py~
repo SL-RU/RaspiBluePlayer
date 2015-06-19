@@ -1,0 +1,23 @@
+from lib_oled96 import ssd1306
+from PIL import Image
+from smbus import SMBus
+from time import sleep
+
+class LcdInterface(object):
+    def __init__(self):
+        pass
+        self.i2cbus = SMBus(1)        # 1 = Raspberry Pi but NOT early REV1 board
+
+        self.oled = ssd1306(i2cbus)   # create oled object, nominating the correct I2C bus, default address
+        try:
+            self.logo_image = Image.open("/home/pi/b/RaspiBluePlayer/raspiblueplayer128logo.png")
+
+        oled.canvas.bitmap((0,0), img, fill=1)
+
+    i2cbus = None
+    oled = None
+    logo_image_path = "/home/pi/b/RaspiBluePlayer/raspiblueplayer128logo.png"
+    logo_image
+    
+    def show_logo(self):
+        pass
