@@ -1,0 +1,3 @@
+[submodule "pilgui"]
+	path = pilgui
+	url = https://github.com/SL-RU/pilgui
