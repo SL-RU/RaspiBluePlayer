@@ -86,6 +86,8 @@ class MusicPlayer(object):
                 dt = json.load(fl)
                 self.play_song_by_name(dt["cur_song"])
                 fl.close()
+        else:
+            self.create_playlist()    
 
     def save(self):
         dt ={
@@ -130,3 +132,15 @@ class MusicPlayer(object):
         if(self.cur_playlist is not None):
             self.cur_playlist.song_played(self.cur_song)
             self.play_forw()
+
+    def input(self, ev, val=0):
+        if ev == "play":
+            self.play()
+        elif ev == "song_forw":
+            self.on_audio_end()
+        elif ev == "stop":     
+            self.play_forw()
+            
+class MusicPlayerGUI(object):
+    def __init__(self, mplayer):
+        pass

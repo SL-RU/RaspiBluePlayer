@@ -50,172 +50,139 @@ print("RaspiBluePlayer starting")
 print("Author: SL_RU <sl_ru@live.com>")
 
 
-hardware.Init()
-#Button's pins, connected to GPIO.
-#physical placement:
-# 0 1   5 6
-#     4 
-# 2 3   7 8
-button_pins = [21, 19, 23, 26, 18, 13, 11, 16, 15]
-
-#Led's pins.
-# Left's id - 0, right's - 1
-led_pins = [24, 22]
-
-#Bluetooth headset MAC. Needed to connecting and listening events
-headset_MAC = "00:11:67:11:11:8C"
-
-buttons = []
-for i in range(len(button_pins)):
-    buttons.append(hardware.GPIOButton(button_pins[i]))
-
-leds = []
-for i in range(len(led_pins)):
-    leds.append(hardware.GPIOLed(led_pins[i]))
-
-blueh = bluetooth_headset.BluetoothHeadsetEvents(headset_MAC)
-    
-pl = aplayer.Aplayer("bt")
-
-
-lcd = lcd_interface.LcdInterface()
-
-path = "/home/pi/music/"
-lcd.text(0, 0, "Music path:")
-lcd.text(0, 10, path)
-
-
-#bookpl = booksplayer.BooksPlayer(pl, path)
-muspl = musicplayer.MusicPlayer(pl, path)
-
-leds[0].set(False)
-leds[1].set(False)
-
-hardware.SetIndLed(leds[1])
-
-curpl = muspl
-
-curpl.load()
-#muspl.create_playlist()
-def cli():
-    global path, curpl, leds
-    inp = ""
-    while True:
-        print("Press q to quit")
-        inp = input()
-        if inp is "q":
-            break
-        elif(inp == "pp"):
-            curpl.play_rnd()
-        elif inp is "s":
-            pl.pause()
-        if inp is "p":
-            curpl.play()
-        if inp is "f":
-            curpl.play_forw()
-        if inp is "k": #skip
-            curpl.on_audio_end()
-        if inp.startswith("save"):
-            print("saving player")
-            curpl.save()
-        if inp.startswith("load"):
-            print("load player")
-            curpl.load()
-        if inp.startswith("cr"):
-            curpl.create_playlist()
-        leds[0].blink(0.2)
-
-def player_update():
-    while True:
-        pl.update()
-        time.sleep(0.09)
+class core(object):
+    def __init__(self):
+        self.init_hardware()
+        self.init_lcd()
+        self.connect_bt()
+        self.init_aplayer()
+        self.init_gui_events()
+        self.start_threads()
+        self.start_player()
         
 
-class HardwareControl(object):
-    def __init__(self, buttons, leds, blue):
-        self.buttons = buttons
-        self.leds = leds
-        self.blue = blue
-        self.init_keys()
-
+    cur_player = None    
     aplayer = None
-    playing = False
-    player = None
+    
+    #Button's pins, connected to GPIO.
+    #physical placement:
+    # 0 1   5 6
+    #     4 
+    # 2 3   7 8                
+    button_pins = [21, 19, 23, 26, 18, 13, 11, 16, 15]
+    #Led's pins.
+    # Left's id - 0, right's - 1
+    led_pins = [24, 22]
+    buttons = None
+    leds = None
+    
+    #Bluetooth headset MAC. Needed to connecting and listening events
+    headset_MAC = "00:11:67:11:11:8C"
+    blueh = None #Bluetooth headset events
 
-    def init_keys(self):
-        self.buttons[4].click = self.play_pause_b
-        self.blue.events[2] = self.play_pause_b
-        self.blue.events[3] = self.play_pause_b
+
+    gui = None
+    
+    
+    def init_hardware(self):
+        hardware.Init()
         
-        self.buttons[6].click = self.skip_b
-        self.blue.events[4] = self.skip_b
+        self.buttons = []
+        for i in range(len(self.button_pins)):
+            self.buttons.append(hardware.GPIOButton(self.button_pins[i]))
 
-        self.buttons[8].press = self.halt_p
+        self.leds = []
+        for i in range(len(self.led_pins)):
+            self.leds.append(hardware.GPIOLed(self.led_pins[i]))
 
-        self.buttons[7].click = self.conn_b
-        self.buttons[5].click = self.forw_b
+        self.leds[0].set(False)
+        self.leds[1].set(False)
+
+        hardware.SetIndLed(self.leds[1])
+
+    def connect_bt(self):
+        self.blueh = bluetooth_headset.BluetoothHeadsetEvents(self.headset_MAC)
         
-    def play_pause_b(self):
-        print("play_pause button")
-        hardware.PressIndicate()
-        if (self.aplayer is not None and self.player is not None):
-            if self.aplayer.playing:
-                self.player.pause()
-            else:
-                self.player.play()
+    def init_aplayer(self):
+        self.aplayer = aplayer.Aplayer("hw")
 
-    def skip_b(self):
-        hardware.PressIndicate()
-        if (self.aplayer is not None and self.player is not None):
-            self.player.on_audio_end()
+    def init_lcd(self):
+        gui = lcd_interface.LcdInterface()
+        #Blah blah
+    
+    def init_gui_events(self):
+        self.buttons[8].press = self.halt
+        
+        ev = [[lambda:self._on_gui_event("up"), lambda:self._on_gui_event("back")],
+              [lambda:self._on_gui_event("ok"), lambda:self._on_gui_event("ok")],
+              [lambda:self._on_gui_event("down"), lambda:self._on_gui_event("forw")],
+              [lambda:self._on_gui_event("info"), lambda:self._on_gui_event("set")],
+              
+              [lambda:self._on_player_event("play"),lambda:self._on_player_event("stop")],
+              
+              [lambda:self._on_player_event("scroll_b"),lambda:self._on_player_event("song_back")],
+              [lambda:self._on_player_event("scroll_f"),lambda:self._on_player_event("song_forw")],
+              [lambda:self._on_player_event("play"),lambda:self._on_player_event("stop")]]
+        for i in range(len(ev)):
+            self.buttons[i].click = ev[i][0]
+            self.buttons[i].press = ev[i][1]
 
-    def forw_b(self):
-        print("forw button")
-        if (self.aplayer is not None and self.player is not None):
-            self.player.play_forw()
+            
+    def _on_gui_event(self, ev):
+        if self.gui.is_on:
+            self.gui.input(ev)
+        else:
+            self.gui.on_off(True)
+    def _on_player_event(self, ev, val=0):
+        self.cur_player.input(ev, val)
+        
+        
+    #Threads:
+    thr_player = None       #aplayer thread
+    thr_hardware = None     #hardware thread
+    thr_blue_ev = None      #bluetooth thread
+    
+    def start_threads(self):
+        #aplayer thread
+        def aplayer_update():
+            while True:
+                self.aplayer.update()
+                time.sleep(0.09)
+        self.thr_player = Thread(target=aplayer_update)
+        self.thr_player.setDaemon(True)
+        self.thr_player.start()
+        print("Player thread started")
 
-    def back_b(self):
-        if (self.aplayer is not None and self.player is not None):
-            pass
+        #hardware thread
+        self.thr_hardware = Thread(target=hardware.Update)
+        self.thr_hardware.setDaemon(True)
+        self.thr_hardware.start()
+        print("hardware thread started")
 
-    def conn_b(self):
+        #bluetooth thread
+        self.thr_blue_ev = Thread(target=self.blueh.Update)
+        self.thr_blue_ev.setDaemon(True)
+        self.thr_blue_ev.start()
+        print("Bluetooth headset event's thread started")
+
+    def start_player(self):
+        self.cur_player = musicplayer.MusicPlayer(self.aplayer, "/home/pi/music")                
+        
+    def connect_bluetooth(self):
         print("connect button")
-        subprocess.call("sudo bt-audio -c " + headset_MAC, stdout=sys.stdout)
-
-    def halt_p(self):
+        subprocess.call("sudo bt-audio -c " + self.headset_MAC, stdout=sys.stdout)
+        
+    def halt(self):
         print("halt button")
         if(self.player is not None):
             self.player.save()
         subprocess.call("sudo halt", stdout=sys.stdout)
+ 
+
         
-        
-cc = HardwareControl(buttons, leds, blueh)
-cc.aplayer = pl
-cc.player = curpl
-        
-thr_player = Thread(target=player_update)
-thr_player.setDaemon(True)
-thr_player.start()
-print("Player thread started")
-
-thr_hardware = Thread(target=hardware.Update)
-thr_hardware.setDaemon(True)
-thr_hardware.start()
-print("hardware thread started")
-
-thr_blue_ev = Thread(target=blueh.Update)
-thr_blue_ev.setDaemon(True)
-thr_blue_ev.start()
-print("Bluetooth headset event's thread started")
-
-
-if not LOG_TO_FILE:
-    thr_cli = Thread(target=cli)
-    thr_cli.setDaemon(True)
-    thr_cli.start()
-    thr_cli.join()
-else:
-    thr_blue_ev.join()
+cr = core()
+cr.thr_blue_ev.join()
+#if LOG_TO_FILE:
 
 if(curpl is not None):
     curpl.save()
